@@ -1,5 +1,7 @@
 library(rvest)
 
+setwd("/Users/christianbaehr/GitHub/chinese_media")
+
 ### Editorials
 
 editorial_pages <- c("http://www.chinadaily.com.cn/opinion/editionals",
@@ -13,7 +15,7 @@ for(i in editorial_pages) {
 }
 editorial_urls <- gsub("//www", "http://www", editorial_urls)
 
-editorial_data <- read.csv("/Users/christianbaehr/Documents/chinese_media/data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
+editorial_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
 
 for(i in 1:length(editorial_urls)) {
   article <- read_html(editorial_urls[i])
@@ -25,7 +27,7 @@ for(i in 1:length(editorial_urls)) {
 
   if(i%%100==0) {cat(i, "of", length(editorial_urls), "\n")}
 }
-# write.csv(editorial_data, "/Users/christianbaehr/Documents/chinese_media/data/inputData/raw_china_daily_editorial_data.csv", row.names = F)
+# write.csv(editorial_data, "data/inputData/raw_china_daily_editorial_data.csv", row.names = F)
 
 ### Op-Eds
 
@@ -40,7 +42,7 @@ for(i in op_ed_pages) {
 }
 op_ed_urls <- gsub("//www", "http://www", op_ed_urls)
 
-op_ed_data <- read.csv("/Users/christianbaehr/Documents/chinese_media/data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
+op_ed_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
 
 for(i in 1:length(op_ed_urls)) {
   article <- read_html(op_ed_urls[i])
@@ -52,7 +54,7 @@ for(i in 1:length(op_ed_urls)) {
 
   if(i%%100==0) {cat(i, "of", length(op_ed_urls), "\n")}
 }
-# write.csv(op_ed_data, "/Users/christianbaehr/Documents/chinese_media/data/inputData/raw_china_daily_oped_data.csv", row.names = F)
+# write.csv(op_ed_data, "data/inputData/raw_china_daily_oped_data.csv", row.names = F)
 
 ###Columnists
 
@@ -72,7 +74,7 @@ for(i in columnist_pages) {
 }
 columnist_urls <- gsub("//www", "http://www", columnist_urls)
 
-columnist_data <- read.csv("/Users/christianbaehr/Documents/chinese_media/data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
+columnist_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
 
 for(i in 1:length(columnist_urls)) {
   article <- read_html(columnist_urls[i])
@@ -84,5 +86,5 @@ for(i in 1:length(columnist_urls)) {
   
   if(i%%100==0) {cat(i, "of", length(columnist_urls), "\n")}
 }
-# write.csv(columnist_data, "/Users/christianbaehr/Documents/chinese_media/data/inputData/raw_china_daily_columnist_data.csv", row.names = F)
+# write.csv(columnist_data, "data/inputData/raw_china_daily_columnist_data.csv", row.names = F)
 

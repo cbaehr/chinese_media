@@ -1,5 +1,7 @@
 
-editorial_data <- read.csv("/Users/christianbaehr/Documents/chinese_media/data/inputData/raw_china_daily_editorial_data.csv", stringsAsFactors = F)
+setwd("/Users/christianbaehr/GitHub/chinese_media")
+
+editorial_data <- read.csv("data/inputData/raw_china_daily_editorial_data.csv", stringsAsFactors = F)
 
 editorial_data <- editorial_data[!duplicated(editorial_data),]
 editorial_data <- editorial_data[-1,]
@@ -56,7 +58,7 @@ editorial_data$type <- "editorial"
 
 ###
 
-oped_data <- read.csv("/Users/christianbaehr/Documents/chinese_media/data/inputData/raw_china_daily_oped_data.csv", stringsAsFactors = F)
+oped_data <- read.csv("data/inputData/raw_china_daily_oped_data.csv", stringsAsFactors = F)
 
 oped_data <- oped_data[!duplicated(oped_data),]
 oped_data <- oped_data[-1,]
