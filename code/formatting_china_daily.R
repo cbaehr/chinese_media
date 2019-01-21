@@ -86,6 +86,7 @@ columnist_data$type <- "column"
 ###################
 
 data <- Reduce(function(x, y) merge(x, y, all=TRUE), list(editorial_data, oped_data, columnist_data))
+rm(list = setdiff(ls(), "data"))
 
 data$title <- gsub("\n", "", data$title)
 data$title <- trimws(data$title)
@@ -99,6 +100,11 @@ sum(data$date_published>"2017-06-30")
 
 sum(grepl("DPRK", data$text) | grepl("North Korea", data$text))
 sum(grepl("DPRK", data$title) | grepl("North Korea", data$title))
+
+library(tidyverse)
+library(tidytext)
+a=as.data.frame(get_sentiments("afinn"))
+
 
 
 
