@@ -95,20 +95,15 @@ data$text <- gsub("\n", "", data$text)
 data$text <- trimws(data$text)
 
 data$date_published <- regmatches(data$date_published, regexpr("[0-9]{4}-[0-9]{2}-[0-9]{2}",  data$date_published))
-data$date_published <- sort(as.Date(data$date_published))
+data$date_published <- as.Date(data$date_published)
 sum(data$date_published>"2017-06-30")
 
-sum(grepl("DPRK", data$text) | grepl("North Korea", data$text))
-sum(grepl("DPRK", data$title) | grepl("North Korea", data$title))
+###
 
-library(tidyverse)
-library(tidytext)
-a=as.data.frame(get_sentiments("afinn"))
+data$title <- tolower(data$title)
+data$text <- tolower(data$text)
 
-
-
-
-
+write.csv(data, "data/processedData/china_daily_data.csv", row.names = F)
 
 
 
