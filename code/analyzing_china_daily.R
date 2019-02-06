@@ -61,9 +61,37 @@ sum(grepl("DPRK", data$title) | grepl("North Korea", data$title))
 
 library(tidyverse)
 library(tidytext)
-a=as.data.frame(get_sentiments("afinn"))
+a <- as.data.frame(get_sentiments("afinn"))
+b <- as.data.frame(get_sentiments("bing"))
+c <- as.data.frame(get_sentiments("nrc"))
+d <- as.data.frame(get_sentiments("loughran"))
 
-get_sentiments(nk_data$text[1])
+length(unlist(data$clean_text2))
+sum(unlist(data$clean_text2) %in% a$word)
+sum(unlist(data$clean_text2) %in% b$word)
+sum(unlist(data$clean_text2) %in% c$word)
+sum(unlist(data$clean_text2) %in% d$word)
+
+for(i in 1:nrow(data)) {
+  data$sentiment[i] <- mean(a$score[which(a$word %in% data$clean_text2[[i]][data$clean_text2[[i]] %in% a$word])])
+}
+
+data$date_published <- as.Date(data$date_published)
+new_data <- setDT(data)[, .(mn_amt = mean(sentiment)), by = .(yr = year(date_published), mon = months(date_published))]
+
+new_data$date <- as.Date(do.call(paste, list(new_data$yr, match(new_data$mon, month.name), "01", sep = "-")), 
+                          format = "%Y-%m-%d")
+new_data <- new_data[year(new_data$date)>2016, ]
+
+plot(new_data$date[order(new_data$date)], new_data$mn_amt[order(new_data$date)], type = 'b')
+abline(h=0, lwd=2, col="blue")
+
+
+
+
+
+
+
 
 
 
