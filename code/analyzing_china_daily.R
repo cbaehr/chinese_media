@@ -1,4 +1,7 @@
 
+library(stopwords)
+library(stringr)
+
 setwd("/Users/christianbaehr/GitHub/chinese_media")
 
 data <- read.csv("data/ProcessedData/china_daily_data.csv", stringsAsFactors = F)
