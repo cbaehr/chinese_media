@@ -4,7 +4,7 @@ setwd("/Users/christianbaehr/GitHub/chinese_media")
 data <- read.csv("data/ProcessedData/china_daily_data.csv", stringsAsFactors = F)
 
 data$clean_text <- str_split(gsub("[^[:alnum:] ]", "", data$text), " +")
-data$clean_text2 <- lapply(data$clean_text, function(x) {x[!(x %in% stop_words$word)]})
+data$clean_text2 <- lapply(str_split(gsub("[^[:alnum:] ]", "", data$text), " +"), function(x) {x[!(x %in% stop_words$word)]})
 
 a <- sort(table(unlist(data$clean_text)), decreasing = T)
 b <- sort(table(unlist(data$clean_text2)), decreasing = T)
@@ -81,7 +81,7 @@ new_data <- setDT(data)[, .(mn_amt = mean(sentiment)), by = .(yr = year(date_pub
 
 new_data$date <- as.Date(do.call(paste, list(new_data$yr, match(new_data$mon, month.name), "01", sep = "-")), 
                           format = "%Y-%m-%d")
-new_data <- new_data[year(new_data$date)>2016, ]
+# new_data <- new_data[year(new_data$date)>2016, ]
 
 plot(new_data$date[order(new_data$date)], new_data$mn_amt[order(new_data$date)], type = 'b')
 abline(h=0, lwd=2, col="blue")

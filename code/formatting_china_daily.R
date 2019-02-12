@@ -85,7 +85,20 @@ columnist_data$type <- "column"
 
 ###################
 
-data <- Reduce(function(x, y) merge(x, y, all=TRUE), list(editorial_data, oped_data, columnist_data))
+news_data <- read.csv("data/inputData/raw_china_daily_news_data.csv", stringsAsFactors = F)
+
+news_data <- news_data[!duplicated(news_data),]
+news_data <- news_data[-1,]
+rownames(news_data) <- seq(1, nrow(news_data), 1)
+
+news_data <- news_data[which(grepl("[0-9]{4}-[0-9]{2}-[0-9]{2}", news_data$date_published)),]
+
+news_data$type <- "news"
+
+###################
+
+data <- Reduce(function(x, y) merge(x, y, all=TRUE), list(editorial_data, oped_data, columnist_data, news_data))
+# data <- Reduce(function(x, y) merge(x, y, all=TRUE), list(editorial_data, oped_data, columnist_data, news_data))
 rm(list = setdiff(ls(), "data"))
 
 data$title <- gsub("\n", "", data$title)

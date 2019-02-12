@@ -88,3 +88,43 @@ for(i in 1:length(columnist_urls)) {
 }
 # write.csv(columnist_data, "data/inputData/raw_china_daily_columnist_data.csv", row.names = F)
 
+###News
+
+# make sure the page numbers are up to date
+news_pages <- c(paste0("http://www.chinadaily.com.cn/china/governmentandpolicy", 1:205, ".html"),
+                paste0("http://www.chinadaily.com.cn/world/asia_pacific/page_", 1:168, ".html"),
+                paste0("http://www.chinadaily.com.cn/world/america", 1:116, ".html"),
+                paste0("http://www.chinadaily.com.cn/world/china-us", 1:265, ".html"))
+
+news_urls <- NULL
+for(i in news_pages) {
+  webpage <- read_html(i)
+  temp <- grep("/201", html_attr(html_nodes(webpage, "a"), "href"), value = T)
+  news_urls <- append(news_urls, temp)
+}
+news_urls <- gsub("//www", "http://www", news_urls)
+
+news_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
+
+for(i in 1:length(news_urls)) {
+  article <- read_html(news_urls[i])
+  title <- as.character(html_text(html_nodes(article, xpath = '//*[@id="lft-art"]/h1')))
+  date_published <- as.character(html_text(html_nodes(article, ".info_l")))
+  text <- as.character(html_text(html_nodes(article, xpath = '//*[@id="Content"]')))
+  
+  news_data <- rbind(news_data, c(title, date_published, text))
+  
+  if(i%%100==0) {cat(i, "of", length(news_urls), "\n")}
+}
+
+
+# write.csv(news_data, "data/inputData/raw_china_daily_news_data.csv", row.names = F)
+
+
+
+
+
+
+
+
+
