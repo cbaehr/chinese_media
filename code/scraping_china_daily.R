@@ -1,38 +1,50 @@
+library(xml2)
 library(rvest)
+library(data.table)
 
 setwd("/Users/christianbaehr/GitHub/chinese_media")
 
 ### Editorials
 
+# create a list of page URLs, make sure updating the number of news pages
 editorial_pages <- c("http://www.chinadaily.com.cn/opinion/editionals",
-          paste0("http://www.chinadaily.com.cn/opinion/editionals/page_", 2:36,".html"))
+                     paste0("http://www.chinadaily.com.cn/opinion/editionals/page_", 2:36,".html"))
 
+# create a list of page URLs
 editorial_urls <- NULL
 for(i in editorial_pages) {
   webpage <- read_html(i)
   temp <- grep("/201", html_attr(html_nodes(webpage, "a"), "href"), value = T)
   editorial_urls <- append(editorial_urls, temp)
 }
+
+# trim URLs to machine readable format
 editorial_urls <- gsub("//www", "http://www", editorial_urls)
 
+# load the sample data structure
 editorial_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
+
+# looping the news list, and scraping published dates, news content,etc
 
 for(i in 1:length(editorial_urls)) {
   article <- read_html(editorial_urls[i])
   title <- as.character(html_text(html_nodes(article, xpath = '//*[@id="lft-art"]/h1')))
   date_published <- as.character(html_text(html_nodes(article, ".info_l")))
   text <- as.character(html_text(html_nodes(article, xpath = '//*[@id="Content"]')))
-
+  
   editorial_data <- rbind(editorial_data, c(title, date_published, text))
-
+  
+  # print out scrapping process 
   if(i%%100==0) {cat(i, "of", length(editorial_urls), "\n")}
 }
+
+# save editorial data to separate file
 # write.csv(editorial_data, "data/inputData/raw_china_daily_editorial_data.csv", row.names = F)
 
 ### Op-Eds
 
 op_ed_pages <- c("http://www.chinadaily.com.cn/opinion/op-ed",
-          paste0("http://www.chinadaily.com.cn/opinion/op-ed/page_", 2:78,".html"))
+                 paste0("http://www.chinadaily.com.cn/opinion/op-ed/page_", 2:78,".html"))
 
 op_ed_urls <- NULL
 for(i in op_ed_pages) {
@@ -49,9 +61,9 @@ for(i in 1:length(op_ed_urls)) {
   title <- as.character(html_text(html_nodes(article, xpath = '//*[@id="lft-art"]/h1')))
   date_published <- as.character(html_text(html_nodes(article, ".info_l")))
   text <- as.character(html_text(html_nodes(article, xpath = '//*[@id="Content"]')))
-
+  
   op_ed_data <- rbind(op_ed_data, c(title, date_published, text))
-
+  
   if(i%%100==0) {cat(i, "of", length(op_ed_urls), "\n")}
 }
 # write.csv(op_ed_data, "data/inputData/raw_china_daily_oped_data.csv", row.names = F)
@@ -119,7 +131,6 @@ for(i in 1:length(news_urls)) {
 
 
 # write.csv(news_data, "data/inputData/raw_china_daily_news_data.csv", row.names = F)
-
 
 
 
