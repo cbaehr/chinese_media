@@ -1,22 +1,31 @@
+rm(list=ls(all=TRUE))
+
 library(rvest)
 
-setwd("/Users/christianbaehr/GitHub/chinese_media")
+setwd("C:/Users/irene/Documents/GitHub/chinese_media")
 
 ### Editorials
 
 editorial_pages <- c("http://www.chinadaily.com.cn/opinion/editionals",
-          paste0("http://www.chinadaily.com.cn/opinion/editionals/page_", 2:36,".html"))
+          paste0("http://www.chinadaily.com.cn/opinion/editionals/page_", 1:38,".html"))
 
+#making a list of the urls of the articles
+#what is "href"?
 editorial_urls <- NULL
 for(i in editorial_pages) {
   webpage <- read_html(i)
   temp <- grep("/201", html_attr(html_nodes(webpage, "a"), "href"), value = T)
   editorial_urls <- append(editorial_urls, temp)
 }
+
+#replacing all the //www in the url with http://www
 editorial_urls <- gsub("//www", "http://www", editorial_urls)
 
+#creating a table of the input data from the data file
 editorial_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
 
+#making a table with the article, title, date published, and text for every webpage
+#having a problem here, not sure why
 for(i in 1:length(editorial_urls)) {
   article <- read_html(editorial_urls[i])
   title <- as.character(html_text(html_nodes(article, xpath = '//*[@id="lft-art"]/h1')))
@@ -27,7 +36,10 @@ for(i in 1:length(editorial_urls)) {
 
   if(i%%100==0) {cat(i, "of", length(editorial_urls), "\n")}
 }
-# write.csv(editorial_data, "data/inputData/raw_china_daily_editorial_data.csv", row.names = F)
+# write.csv(editorial_data, "data/inputData/irene_test_raw_china_daily_editorial_data.csv", row.names = F)
+
+
+
 
 ### Op-Eds
 
@@ -55,6 +67,9 @@ for(i in 1:length(op_ed_urls)) {
   if(i%%100==0) {cat(i, "of", length(op_ed_urls), "\n")}
 }
 # write.csv(op_ed_data, "data/inputData/raw_china_daily_oped_data.csv", row.names = F)
+
+
+
 
 ###Columnists
 
@@ -87,6 +102,9 @@ for(i in 1:length(columnist_urls)) {
   if(i%%100==0) {cat(i, "of", length(columnist_urls), "\n")}
 }
 # write.csv(columnist_data, "data/inputData/raw_china_daily_columnist_data.csv", row.names = F)
+
+
+
 
 ###News
 
