@@ -1,14 +1,22 @@
 rm(list=ls(all=TRUE))
 
 library(rvest)
+library(devtools)
+library(rJava)
+library(RDRPOSTagger)
+library(tokenizers)
+library(dplyr)
+library(xml2)
 
+#install.packages("rvest")
+#install.packages("xml2")
 setwd("C:/Users/irene/Documents/GitHub/chinese_media")
 
 ### Editorials
 
 #only doing pg 1-2
 editorial_pages <- c("http://www.chinadaily.com.cn/opinion/editionals",
-                     paste0("http://www.chinadaily.com.cn/opinion/editionals/page_", 1:38,".html"))
+                     paste0("http://www.chinadaily.com.cn/opinion/editionals/page_", 1:2,".html"))
 
 #making a list of the urls of the articles
 #what is "href"?
@@ -21,6 +29,8 @@ for(i in editorial_pages) {
 
 #replacing all the //www in the url with http://www
 editorial_urls <- gsub("//www", "http://www", editorial_urls)
+
+editorial_urls <- unique(editorial_urls, incomparables = FALSE)
 
 #creating a table of the input data from the data file
 editorial_data <- read.csv("data/inputData/china_daily_pre_data.csv", stringsAsFactors = F)
@@ -37,14 +47,24 @@ for(i in 1:length(editorial_urls)) {
   if(i%%100==0) {cat(i, "of", length(editorial_urls), "\n")}
 }
 
-editorial_data <- unique(editorial_data, incomparables = FALSE)
+#editorial_data <- unique(editorial_data, incomparables = FALSE)
 
 editorial_data <- editorial_data[-1, ]
+editorial_data$text <- gsub("\\n", " ", editorial_data$text)
 
-test_data <- editorial_data[grep("North Korea", editorial_data$text), ]
+write.csv(editorial_data, "C:/Users/irene/Documents/GitHub/chinese_media/irene_all_data.csv", row.names = F)
 
-test_data$text <- gsub("\\n", " ", test_data$text)
-test_data <- as.data.frame(test_data)
+test_data <- editorial_data[grep("North Korea|DPRK", editorial_data$text), ]
+
+toRemove <- grep("North Korea|DPRK", editorial_data$text)
+non_nk_data <- editorial_data[-toRemove, ] 
+#non_nk_data <- editorial_data[!grep("North Korea", editorial_data$text), ]
+#test_data <- as.data.frame(test_data)
 #editorial_data <- as.data.frame(editorial_data)
 
-#write.csv(editorial_data, "data/inputData/irene_test2_raw_china_daily_editorial_data.csv", row.names = F)
+write.csv(non_nk_data, "C:/Users/irene/Documents/GitHub/chinese_media/irene_non_nk_data.csv", row.names = F)
+
+write.csv(test_data, "C:/Users/irene/Documents/GitHub/chinese_media/irene_nk_data.csv", row.names = F)
+
+#non_nk_data <- read.csv("C:/Users/irene/Documents/GitHub/chinese_media/irene_non_nk_data.csv", stringsAsFactors = F)
+#test_data <- read.csv("C:/Users/irene/Documents/GitHub/chinese_media/irene_nk_data.csv", stringsAsFactors = F)
