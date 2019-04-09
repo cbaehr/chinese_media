@@ -3,6 +3,7 @@ library(readxl)
 library(quanteda)
 library(dplyr)
 library(ggplot2)
+library(readtext)
 xiake_trade <- read_excel("/Users/martin/Desktop/lab/xiake_trade.xlsx")
 
 #String of Experimert News
@@ -20,7 +21,7 @@ ch_dfm <- dfm(ch_toks)
 #Top Word Frequency
 topfeatures(ch_dfm)
 
-#World Frequency
+#Word Frequency
 a <- textstat_frequency(ch_dfm)
 
 #A for loop to count certain world frequency
@@ -42,3 +43,17 @@ vec <- as.data.frame(vec, stringsAsFactors=FALSE);
 freq <- cbind(vec,xiake_trade$date_published)
 colnames(freq) <- c("frequency","date")
 ggplot(freq, aes(x=date,y = frequency)) +geom_bar(stat = "identity",color='royalblue')
+
+#Import a dictionary 
+sen <- read_excel('/Users/martin/Desktop/lab/sentiment/Sentiment.xlsx')
+neg <- as.list(sen[,1 ])
+pos <- as.list(sen[,2 ])
+di <- rbind(neg,pos)
+names(di)<-c('positive','negative')
+dic1 <- dictionary(di)
+
+#Experiment with the dictionary 
+View(dic1)
+b<-dfm_lookup(ch_dfm,dic1)
+View(b)
+
