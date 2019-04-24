@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1551766672867.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "40CF96E9",
+    "lastKnownWriteTime" : 3419473789575321445,
+    "last_content_update" : 1551766672867,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "1957116E",
+        "caption" : "wechat_data",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=wechat_data&cache_key=1957116E",
+        "displayedObservations" : 192,
+        "environment" : "",
+        "object" : "wechat_data",
+        "preview" : 0,
+        "totalObservations" : 192,
+        "variables" : 3
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
