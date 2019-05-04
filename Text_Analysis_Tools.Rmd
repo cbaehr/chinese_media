@@ -1,0 +1,198 @@
+---
+title: "Text Analysis Tools"
+output: html_notebook
+
+---
+```{r}
+#Clean all variables when necessary
+rm(list=ls())
+```
+
+
+```{r}
+#Import Necessary Packages
+library(readxl)
+library(quanteda)
+library(dplyr)
+library(ggplot2)
+library(readtext)
+library(tmcn)
+```
+
+2.Load the Data
+```{r}
+#Read the data in excel file 
+xiake_trade <- read_excel("/Users/martin/Desktop/lab/xiake_trade.xlsx")  
+china_daily_trade <- read_excel("/Users/martin/Desktop/lab/china_daily_trade.xlsx")
+```
+We can load any other collection of articles as long as we change the file path and name in the parentheses. In this demonstration, we use the xiakedao chinese article for US trade and china daily english article for US trade. 
+
+3. Chinese Word Frequency
+
+```{r}
+vec <- vector()
+for (i in 1:nrow(xiake_trade))  #put the variable name of the file you want to analyze in here
+{news <- toString(xiake_trade[i,'text'])
+ ch_stop <- stopwords("zh", source = "misc")
+ news_toks <- news %>% 
+  tokens(remove_punct = TRUE) %>%
+  tokens_remove(pattern = ch_stop)
+ news_dfm <- dfm(news_toks)
+ a <- textstat_frequency(news_dfm)
+ g <- filter(a,feature == '霸权')  #put the key word you want to count the frequency after the two equal signs  
+ if(nrow(g)==0){vec[i]=0} else{vec[i]=g[1,'frequency']}}
+```
+The codes in the block above will calcualte how many times a word appear in each articles. In this example, we use '霸权'(hegemony). In the next block, we will plot the occurance of it over time. 
+
+```{r}
+vec <- as.data.frame(vec, stringsAsFactors=FALSE);
+freq <- cbind(vec,xiake_trade$date_published)
+colnames(freq) <- c("frequency","date")
+ggplot(freq, aes(x=date,y = frequency)) +geom_bar(stat = "identity",color='Orange')
+```
+
+As we can see from the graph, xiake dao increase the frequency of hegemony around July and August 2018, when U.S. annouced tariff list. The article that uses 8 times of the word hegemony is an interview with college professor. The professor keep using the word hegemony to describe the U.S. foreign policies so we may better consider it as an outlier. 
+
+4. Dictionary Based Sentiment Analysis for Chinese Articles 
+4.1 An Online Dictionary
+```{r}
+#Load the Dictionary
+sen <- read_excel('/Users/martin/Desktop/lab/sentiment/Sentiment3.xlsx') #put the dictionary file here, it should only contain positive and negative words 
+neg <- as.list(sen[,1 ])
+pos <- as.list(sen[,2 ])
+di <- rbind(neg,pos)
+names(di)<-c('positive','negative')
+dic1 <- dictionary(di)
+```
+We load a Chinese dictionary into the quanteda package so we can analyze the number of positive and negative words in each article. 
+
+```{r}
+#Calculate the Sentiment Score 
+pos_score <- vector()
+neg_score <- vector()
+ratio_score <- vector()
+
+for (i in 1:nrow(xiake_trade))
+{news <- toString(xiake_trade[i,'text'])  #load each article in the loop 
+ch_stop <- stopwords("zh", source = "misc")
+news_toks <- news %>% 
+  tokens(remove_punct = TRUE) %>%
+  tokens_remove(pattern = ch_stop)  #tokenize the text and remove stop words 
+news_dfm <- dfm(news_toks) #change the token to dfm data type
+f<-dfm_lookup(news_dfm,dic1) #look at the dictionary to find positive and negative words 
+f<-convert(f, to = "data.frame")
+pos_score[i] <- f[1,2]   #Store how many positive words each article contains
+neg_score[i] <- f[1,3]   #Store how many negative words each article contains
+ratio_score[i] = f[1,2]/(f[1,3]+f[1,2])}  #Calculate the portion of positive words in each article}
+```
+In the code block above, we calculate how much positive word and how much negative word each article has and store them into separate vector. Also, we calculate the ratio of positive words over the sum of the number of positive and negative words in each article. So we will get a number between 0 and 1 and the article is more positive if the number is closer to 1. 
+
+We plot the ratio in barplot over time. 
+
+```{r}
+ch_score <- as.data.frame(ratio_score, stringsAsFactors=FALSE);
+ch_sentiment <- cbind(ch_score,xiake_trade$date_published)
+colnames(ch_sentiment) <- c("sentiment","date")
+ggplot(ch_sentiment, aes(x=date,y = sentiment)) +geom_bar(stat = "identity",color='seagreen')
+```
+
+In the code below, we generate another plot to see the trend of sentiment over time by using the geom_smooth function in R. The blue line represents the general trend of the sentiment. 
+```{r}
+ggplot(data = ch_sentiment) + 
+  geom_point(mapping = aes(x = date, y = sentiment))+
+  geom_smooth(mapping = aes(x = date, y = sentiment))
+```
+
+4.2 Dictionary from Taiwan National University 
+
+In this section, we conduct the same analysis with a differnt sentiment dictionary from Taiwan National University. 
+
+```{r}  
+data(NTUSD) #load the dictionary from tmcn package
+dic2 <- dictionary(NTUSD)
+```
+
+```{r}
+#Calculate the Sentiment Score 
+pos_score_1 <- vector()
+neg_score_1 <- vector()
+ratio_score_1 <- vector()
+
+for (i in 1:nrow(xiake_trade))
+{news <- toString(xiake_trade[i,'text'])  #load each article in the loop 
+ch_stop <- stopwords("zh", source = "misc")
+news_toks <- news %>% 
+  tokens(remove_punct = TRUE) %>%
+  tokens_remove(pattern = ch_stop)  #tokenize the text and remove stop words 
+f<-tokens_lookup(news_toks,dic2[1:2]) #look at the dictionary to find positive and negative words 
+f<-dfm(f)
+f<-convert(f, to = "data.frame")
+pos_score_1[i] <- f[1,2]   #Store how many positive words each article contains
+neg_score_1[i] <- f[1,3]   #Store how many negative words each article contains
+ratio_score_1[i] = f[1,2]/(f[1,3]+f[1,2])}  #Calculate the portion of positive words in each article}
+```
+
+```{r}
+ch_score_1 <- as.data.frame(ratio_score_1, stringsAsFactors=FALSE);
+ch_sentiment_1 <- cbind(ch_score_1,xiake_trade$date_published)
+colnames(ch_sentiment_1) <- c("sentiment","date")
+ggplot(ch_sentiment_1, aes(x=date,y = sentiment)) +geom_bar(stat = "identity",color='orange')
+```
+
+```{r}
+ggplot(data = ch_sentiment_1) + 
+  geom_point(mapping = aes(x = date, y = sentiment))+
+  geom_smooth(mapping = aes(x = date, y = sentiment))
+```
+
+
+
+
+5. Dictionary Based Sentimen Analysis for English Articles
+```{r}
+#Sort the table by date 
+#china_daily_trade <- mutate(china_daily_trade,date_published = as.Date(date_published, "%Y/%m/%d"))
+china_daily_trade <- arrange(china_daily_trade,date_published)
+```
+
+```{r}
+score <- vector()
+pos <- vector()
+neg <- vector()
+for (i in 1:nrow(china_daily_trade))        
+  {ana <- toString(china_daily_trade[i,'text'])   #Put the data set you want to analyze in here 
+  toks_news <- tokens(ana, remove_punct = TRUE)
+  toks_news_cd <- tokens_lookup(toks_news, dictionary =  data_dictionary_LSD2015[1:2])  #Load the dictionary you want to use here; In this example, we use the default dictionary in quanteda package 
+  dfmat_news_cd <- dfm(toks_news_cd)
+  f<-convert(dfmat_news_cd, to = "data.frame")
+  pos[i] <- f[1,3]   #Store how many positive words each article contains
+  neg[i] <- f[1,2]   #Store how many negative words each article contains
+  score[i] = f[1,3]/(f[1,3]+f[1,2])}  #Calculate the portion of positive words in each article
+```
+
+Similar to analyze the Chinese articles, we calculate how much positive word and how much negative word each article has and store them into separate vector. Also, we calculate the ratio of positive words over the sum of the number of positive and negative words in each article. So we will get a number between 0 and 1 and the article is more positive if the number is closer to 1. 
+
+
+In the code below, we generate a plot to see the trend of sentiment over time by using the geom_smooth function in R. The blue line represents the general trend of the sentiment. 
+
+```{r}
+score <- as.data.frame(score, stringsAsFactors=FALSE);
+sentiment <- cbind(score,china_daily_trade$date_published,china_daily_trade$type)
+colnames(sentiment) <- c("score","date","type")
+ggplot(data = sentiment) + 
+  geom_point(mapping = aes(x = date, y = score))+
+  geom_smooth(mapping = aes(x = date, y = score))
+
+```
+Our data for china daily has four types of article- columnist, editoral, news, and oped. We use the code below to plot the sentiment for each type our time with a line chart. 
+```{r}
+ggplot(data = sentiment) + 
+  geom_line(mapping = aes(x = date, y = score,color = type))
+```
+
+The line chart seems to be too messy so we use the geom_smooth funtion again to plot the trend over time. However, because the number of certain types of articles are too small, we will get the warning message from R the smooth line might be inaccurate. But we keep this code here because it may be helpful if we have enough amount of data for each type of article. 
+```{r}
+ggplot(data = sentiment) + 
+  geom_point(mapping = aes(x = date, y = score,color = type))+
+  geom_smooth(mapping = aes(x = date, y = score,color = type))
+```
